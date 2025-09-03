@@ -20,6 +20,10 @@ help:
 	@echo "  status         - Show migration status"
 	@echo "  history        - Show migration history"
 	@echo "  fix-migration  - Fix common migration issues"
+	@echo "  test-cors      - Test CORS configuration"
+	@echo "  test-external-cors - Test CORS with external origin"
+	@echo "  test-external-cors-script - Test CORS with external origin (Python script)"
+	@echo "  serve-cors-test - Serve CORS test HTML file"
 
 # Install dependencies
 install:
@@ -148,3 +152,45 @@ quickstart: setup-env install check-db
 	@echo "2. Run 'make create-tables' to create database tables"
 	@echo "3. Run 'make dev' to start the development server"
 	@echo "4. Visit http://localhost:8000/docs for API documentation"
+
+# CORS testing
+test-cors:
+	@echo "Testing CORS configuration..."
+	@echo "1. Starting server in background..."
+	@make dev &
+	@sleep 3
+	@echo "2. Testing CORS endpoint..."
+	@curl -s http://localhost:8000/cors-test | python -m json.tool
+	@echo "3. Testing CORS headers..."
+	@curl -s -H "Origin: http://localhost:3000" -v http://localhost:8000/health 2>&1 | grep -E "(Access-Control|Origin)"
+	@echo "4. Stopping server..."
+	@pkill -f "python runserver.py"
+	@echo "CORS test completed!"
+
+test-external-cors:
+	@echo "Testing CORS with external origin..."
+	@echo "1. Starting server in background..."
+	@make dev &
+	@sleep 3
+	@echo "2. Testing external origin CORS..."
+	@curl -s -H "Origin: https://json-api-free.onrender.com" -v http://localhost:8000/health 2>&1 | grep -E "(Access-Control|Origin)"
+	@echo "3. Stopping server..."
+	@pkill -f "python runserver.py"
+	@echo "External CORS test completed!"
+
+test-external-cors-script:
+	@echo "Testing CORS with external origin using Python script..."
+	@echo "1. Starting server in background..."
+	@make dev &
+	@sleep 3
+	@echo "2. Running external CORS test script..."
+	@. .venv/bin/activate && python test-external-cors.py
+	@echo "3. Stopping server..."
+	@pkill -f "python runserver.py"
+	@echo "External CORS script test completed!"
+
+serve-cors-test:
+	@echo "Serving CORS test HTML file..."
+	@echo "Open http://localhost:8080/cors-test.html in your browser"
+	@echo "Make sure your FastAPI server is running on port 8000"
+	@python -m http.server 8080
