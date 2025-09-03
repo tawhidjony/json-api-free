@@ -14,7 +14,8 @@ def create_user(db: Session, data: UserCreate) -> User:
     existing = db.execute(select(User).where(User.email == data.email)).scalar_one_or_none()
     if existing:
         raise HTTPException(status_code=409, detail="Email already exists")
-    user = User(email=data.email, full_name=data.full_name)
+    user = User(email=data.email, full_name=data.full_name, department=data.department, assigned_training=data.assigned_training, completed_training=data.completed_training, status=data.status)
+    print(user)
     db.add(user)
     try:
         db.commit()
@@ -42,6 +43,14 @@ def update_user(db: Session, user_id: int, data: UserUpdate) -> User | None:
         user.email = data.email
     if data.full_name is not None:
         user.full_name = data.full_name
+    if data.department is not None:
+        user.department = data.department
+    if data.assigned_training is not None:
+        user.assigned_training = data.assigned_training
+    if data.completed_training is not None:
+        user.completed_training = data.completed_training
+    if data.status is not None:
+        user.status = data.status
     try:
         db.commit()
     except IntegrityError:

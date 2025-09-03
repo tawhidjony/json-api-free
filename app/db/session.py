@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import os
-from typing import Generator
+from typing import Iterator
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -14,10 +14,10 @@ if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL is not set in environment")
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, expire_on_commit=False, bind=engine)
 
 
-def get_db() -> Generator:
+def get_db() -> Iterator[Session]:
     db = SessionLocal()
     try:
         yield db

@@ -13,7 +13,8 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run FastAPI server")
     parser.add_argument("--host", default=os.getenv("HOST", "0.0.0.0"), help="Host to bind")
     parser.add_argument("--port", type=int, default=int(os.getenv("PORT", "8000")), help="Port")
-    parser.add_argument("--reload", action="store_true", default=True, help="Enable autoreload")
+    default_reload = os.getenv("RELOAD", "false").lower() in {"1", "true", "yes"}
+    parser.add_argument("--reload", action="store_true", default=default_reload, help="Enable autoreload")
     parser.add_argument("--no-reload", dest="reload", action="store_false", help="Disable autoreload")
     return parser.parse_args(argv)
 
@@ -38,4 +39,3 @@ def main(argv: Optional[list[str]] = None) -> None:
 
 if __name__ == "__main__":
     main()
-push
